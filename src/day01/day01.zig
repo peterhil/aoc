@@ -48,7 +48,7 @@ fn part2() !i32 {
         var depth = try std.fmt.parseInt(i32, line, 10);
         try buffer.append(depth);
 
-        if (buffer.len == window_length) {
+        if (buffer.len == window_length + 1) {
             // As the sum of middle items are always the same, only the edges need to be compared
             if (depth > buffer.get(0)) {
                 increases += 1;
@@ -62,5 +62,5 @@ fn part2() !i32 {
 
 test "day01.part2" {
     @setEvalBranchQuota(200_000);
-    try testing.expectEqual(1420, comptime try part2());
+    try testing.expectEqual(1486, comptime try part2());
 }
