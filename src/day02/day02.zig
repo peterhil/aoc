@@ -9,7 +9,7 @@ const input = @embedFile("./input.txt");
 pub fn main() anyerror!void {
     print("Day 2: Dive!\n", .{});
     print("Part 1: {d}\n", .{part1()});
-    // print("Part 2: {d}\n", .{part2()});
+    print("Part 2: {d}\n", .{part2()});
 }
 
 const Point = packed struct {
@@ -61,4 +61,40 @@ fn part1() !i32 {
 test "day02.part1" {
     @setEvalBranchQuota(200_000);
     try testing.expectEqual(1451208, comptime try part1());
+}
+
+///
+/// --- Part Two ---
+///
+fn part2() !i32 {
+    var position = Point{ .x = 0, .y = 0 };
+    var lines = std.mem.split(u8, std.mem.trimRight(u8, input, "\n"), "\n");
+    var aim: i32 = 0;
+
+    while (lines.next()) |line| {
+        var movement: Point = Point{};
+        var command = std.mem.split(u8, line, " ");
+        var dir = command.next() orelse "";
+        var quantity = try std.fmt.parseInt(i32, command.next() orelse "0", 10);
+
+        if (equals(dir, "up")) {
+            aim -= quantity;
+        } else if (equals(dir, "down")) {
+            aim += quantity;
+        } else if (equals(dir, "forward")) {
+            movement = Point{ .x = quantity, .y = aim * quantity };
+        } else {
+            print("Don't know direction: {s}", .{dir});
+        }
+
+        position = add(position, movement);
+    }
+    // print("Distance: {d}m, depth: {d}m\n", .{ position.x, position.y });
+
+    return position.x * position.y;
+}
+
+test "day02.part2" {
+    @setEvalBranchQuota(200_000);
+    try testing.expectEqual(1620141160, comptime try part2());
 }
