@@ -16,7 +16,7 @@ pub fn main() anyerror!void {
     // print("Part 2: {d}\n", .{part2()});
 }
 
-fn bitArrayToUnsignedInt(bits: *[]u2) u64 {
+fn bitArrayToUnsignedInt(bits: []u2) u64 {
     var integer: u64 = 0;
     for (bits) |bit| {
         integer = (integer << 1) + bit;
@@ -55,10 +55,10 @@ fn part1() !u64 {
         bits[i] = bit;
     }
 
-    const gamma: u64 = 2502; // bitArrayToUnsignedInt(bits);
+    const gamma: u64 = bitArrayToUnsignedInt(bits);
     const epsilon: u64 = ~gamma & 0xFFF;
 
-    // print("lines: {[count]d}\n", .{ .count = count });
+    // print("lines: {[total]d}\n", .{ .total = total });
     // print("ones: {[ones]d}\n", .{ .ones = ones });
     // print("bits: {[bits]d}\n", .{ .bits = bits });
     // print("gamma: {[gamma]d}\n", .{ .gamma = gamma });
@@ -69,7 +69,7 @@ fn part1() !u64 {
 
 test "day03.part1" {
     @setEvalBranchQuota(200_000);
-    try testing.expectEqual(@as(u64, 3985686), try part1());
+    try testing.expectEqual(@as(u64, 3803504), try part1());
 }
 
 fn readReport(whole_input: []const u8) ![][]const u8 {
