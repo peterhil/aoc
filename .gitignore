@@ -1,4 +1,5 @@
 #*#
+*.core
 *~
 .DS_Store
 zig-cache

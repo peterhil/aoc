@@ -1,8 +1,9 @@
 /// # Advent of Code - Day 2
 const std = @import("std");
-const testing = std.testing;
-const print = std.debug.print;
+
 const Allocator = std.mem.Allocator;
+const print = std.debug.print;
+const testing = std.testing;
 
 const input = @embedFile("./input.txt");
 
