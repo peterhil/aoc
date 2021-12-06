@@ -41,7 +41,8 @@ fn part1() !u64 {
     var offset: u64 = 0;
 
     while (offset < bitWidth) {
-        var mask = math.pow(u64, 2, bitWidth - offset);
+        var mask = math.pow(u64, 2, bitWidth - offset) / 2;
+
         for (numbers) |number| {
             if (number & mask != 0) {
                 ones[offset] = @as(u64, ones[offset]) + @as(u64, 1);
