@@ -49,10 +49,16 @@ test "getMask" {
 fn bitArrayToUnsignedInt(bits: [bitWidth]u2) u64 {
     var integer: u64 = 0;
 
-    for (bits) |bit, i| {
-        integer = (integer >> 1) + bit * (@as(u64, 1) << @intCast(u5, i));
+    for (bits) |bit| {
+        integer = (integer << 1) + bit;
     }
     return integer;
+}
+
+test "bitArrayToUnsignedInt" {
+    const expected: u64 = 1970;
+    const bits = [12]u2{ 0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0 };
+    try testing.expectEqual(expected, bitArrayToUnsignedInt(bits));
 }
 
 fn part1() !u64 {
@@ -94,5 +100,5 @@ fn part1() !u64 {
 
 test "day02.part1" {
     @setEvalBranchQuota(200_000);
-    try testing.expectEqual(@as(u64, 5014368), comptime try part1());
+    try testing.expectEqual(@as(u64, 4458250), comptime try part1());
 }
