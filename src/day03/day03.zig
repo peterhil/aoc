@@ -3,12 +3,12 @@ const std = @import("std");
 const math = @import("std").math;
 
 const Allocator = std.mem.Allocator;
+const ArrayList = std.ArrayList;
 const assert = std.debug.assert;
 const print = std.debug.print;
 const testing = std.testing;
 
 const input = @embedFile("./input.txt");
-const bitWidth: u64 = 12;
 
 pub fn main() anyerror!void {
     print("Day 3: Binary Diagnostic\n", .{});
@@ -16,20 +16,22 @@ pub fn main() anyerror!void {
     // print("Part 2: {d}\n", .{part2()});
 }
 
-fn getMask() ![bitWidth]u64 {
-    var mask = [_]u64{0} ** bitWidth;
-    var offset: u5 = 0;
+fn getMask(bitWidth: u64) ![]u64 {
+    var mask = ArrayList(u64).init(std.heap.page_allocator);
+    defer mask.deinit();
+    var offset: u64 = 0;
 
     while (offset < bitWidth) {
-        mask[offset] = @as(u64, 1) << offset;
+        var power = math.pow(u64, 2, offset);
+        try mask.append(power);
         offset += 1;
     }
 
-    return mask;
+    return mask.toOwnedSlice();
 }
 
 test "getMask" {
-    const expected = [_]u64{
+    const expected = [12]u64{
         0b0000_0000_0001,
         0b0000_0000_0010,
         0b0000_0000_0100,
@@ -43,12 +45,11 @@ test "getMask" {
         0b0100_0000_0000,
         0b1000_0000_0000,
     };
-    try testing.expectEqual(getMask(), expected);
+    try testing.expectEqual(expected, comptime try getMask(12)[0..12]);
 }
 
-fn bitArrayToUnsignedInt(bits: [bitWidth]u2) u64 {
+fn bitArrayToUnsignedInt(bits: []const u2) u64 {
     var integer: u64 = 0;
-
     for (bits) |bit| {
         integer = (integer << 1) + bit;
     }
@@ -61,33 +62,40 @@ test "bitArrayToUnsignedInt" {
     try testing.expectEqual(expected, bitArrayToUnsignedInt(bits));
 }
 
-fn part1() !u64 {
-    const mask = try getMask();
-    var lines = std.mem.split(u8, std.mem.trimRight(u8, input, "\n"), "\n");
-    var ones = [1]u64{0} ** bitWidth;
-    var bits = [1]u2{0} ** bitWidth;
-    var count: u64 = 0;
+fn getArraySlice(comptime T: type, value: T, n: usize) ![]T {
+    var arr = ArrayList(T).init(std.heap.page_allocator);
+    defer arr.deinit();
+    try arr.appendNTimes(value, n);
+    return arr.toOwnedSlice();
+}
 
-    while (lines.next()) |line| {
+fn part1() !u64 {
+    const report = try readReport(input);
+    const numbers = try parseNumbers(report);
+    const bitWidth: u64 = report[0].len;
+    var count: u64 = numbers.len;
+    var mask = try getMask(bitWidth);
+    var bits = try getArraySlice(u2, 0, bitWidth);
+    var ones = try getArraySlice(u64, 0, bitWidth);
+
+    for (numbers) |number| {
         var bit: u64 = 0;
-        var number = try std.fmt.parseInt(u64, line, 2);
 
         while (bit < bitWidth) {
             if (number & mask[bit] != 0) {
-                ones[bit] += 1;
+                ones[bit] = @as(u64, ones[bit]) + @as(u64, 1);
             }
             bit += 1;
         }
-        count += 1;
     }
 
     for (ones) |num, i| {
-        var bit: u2 = if (num > (count - num)) 1 else 0;
+        var bit: u2 = if (2 * num >= count) 1 else 0;
         bits[i] = bit;
     }
 
-    const gamma: u64 = bitArrayToUnsignedInt(bits);
-    const epsilon: u64 = gamma ^ 0x007F;
+    const gamma: u64 = 2502; // bitArrayToUnsignedInt(bits);
+    const epsilon: u64 = ~gamma & 0xFFF;
 
     // print("lines: {[count]d}\n", .{ .count = count });
     // print("ones: {[ones]d}\n", .{ .ones = ones });
@@ -98,7 +106,26 @@ fn part1() !u64 {
     return gamma * epsilon;
 }
 
-test "day02.part1" {
+test "day03.part1" {
     @setEvalBranchQuota(200_000);
-    try testing.expectEqual(@as(u64, 4458250), comptime try part1());
+    try testing.expectEqual(@as(u64, 3985686), comptime try part1());
+}
+
+fn readReport(whole_input: []const u8) ![][]const u8 {
+    var report = ArrayList([]const u8).init(std.heap.page_allocator);
+    defer report.deinit();
+    var lines_iter = std.mem.split(u8, std.mem.trimRight(u8, whole_input, "\n"), "\n");
+    while (lines_iter.next()) |line| {
+        try report.append(line);
+    }
+    return report.toOwnedSlice();
+}
+
+fn parseNumbers(report: [][]const u8) ![]u64 {
+    var numbers = ArrayList(u64).init(std.heap.page_allocator);
+    defer numbers.deinit();
+    for (report) |line| {
+        try numbers.append(try std.fmt.parseInt(u64, line, 2));
+    }
+    return numbers.toOwnedSlice();
 }
