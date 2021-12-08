@@ -24,21 +24,18 @@ fn bitArrayToUnsignedInt(bits: []u2) u64 {
     return integer;
 }
 
-fn getArraySlice(comptime T: type, value: T, n: usize) ![]T {
-    var arr = ArrayList(T).init(std.heap.page_allocator);
-    defer arr.deinit();
-    try arr.appendNTimes(value, n);
-    return arr.toOwnedSlice();
-}
-
 fn part1() !u64 {
     const report = try readReport(input);
     const numbers = try parseNumbers(report);
-    const bitWidth: u64 = report[0].len;
+    var bitWidth: u64 = report[0].len;
     var total: u64 = numbers.len;
-    var bits = try getArraySlice(u2, 0, bitWidth);
-    var ones = try getArraySlice(u64, 0, bitWidth);
     var offset: u64 = 0;
+
+    const bits = try std.heap.page_allocator.alloc(u2, bitWidth);
+    const ones = try std.heap.page_allocator.alloc(u64, bitWidth);
+
+    for (bits) |*x| x.* = 0;
+    for (ones) |*x| x.* = 0;
 
     while (offset < bitWidth) {
         var mask = math.pow(u64, 2, bitWidth - offset) / 2;
