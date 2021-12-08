@@ -25,14 +25,18 @@ fn bitArrayToUnsignedInt(bits: []u2) u64 {
 }
 
 fn part1() !u64 {
+    const allocator = std.heap.page_allocator;
     const report = try readReport(input);
     const numbers = try parseNumbers(report);
     var bitWidth: u64 = report[0].len;
     var total: u64 = numbers.len;
     var offset: u64 = 0;
 
-    const bits = try std.heap.page_allocator.alloc(u2, bitWidth);
-    const ones = try std.heap.page_allocator.alloc(u64, bitWidth);
+    const bits = try allocator.alloc(u2, bitWidth);
+    defer allocator.free(bits);
+
+    const ones = try allocator.alloc(u64, bitWidth);
+    defer allocator.free(ones);
 
     for (bits) |*x| x.* = 0;
     for (ones) |*x| x.* = 0;
