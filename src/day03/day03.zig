@@ -70,7 +70,7 @@ fn part1() !u64 {
 
 test "day03.part1" {
     @setEvalBranchQuota(200_000);
-    try testing.expectEqual(@as(u64, 3803504), try part1());
+    try testing.expectEqual(@as(u64, 3549854), try part1());
 }
 
 fn readReport(whole_input: []const u8) ![][]const u8 {
