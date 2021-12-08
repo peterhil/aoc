@@ -52,8 +52,7 @@ fn part1() !u64 {
     }
 
     for (ones) |count, i| {
-        var bit: u2 = if (2 * count >= total) 1 else 0;
-        bits[i] = bit;
+        bits[i] = @boolToInt(2 * count >= total);
     }
 
     const gamma: u64 = bitArrayToUnsignedInt(bits);
